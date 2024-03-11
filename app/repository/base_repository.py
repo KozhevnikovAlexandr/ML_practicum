@@ -1,0 +1,61 @@
+import sys
+from pathlib import Path
+from abc import ABC, abstractmethod
+
+from sqlalchemy import insert, select, update, create_engine
+from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from database.init_database import DB_ADDRESS
+
+sys.path.append(str(Path(__file__).resolve().parents[2]))
+
+sync_engine = create_engine(f'sqlite:///{DB_ADDRESS}')
+async_engine = create_async_engine(f'sqlite+aiosqlite:///{DB_ADDRESS}')
+async_session_maker = async_sessionmaker(async_engine, expire_on_commit=False)
+
+
+class AbstractRepository(ABC):
+    @abstractmethod
+    async def add(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def find_by_options(self, **kwargs):
+        raise NotImplementedError
+
+
+class SQLAlchemyRepository(AbstractRepository):
+    model = None
+
+    async def add(self, data: dict) -> int:
+        async with async_session_maker() as session:
+            stmt = insert(self.model).values(**data)
+
+            # Check if the database supports the RETURNING clause
+            if session.bind.dialect.name.lower() != 'sqlite':
+                stmt = stmt.returning(self.model.id)
+
+            res = await session.execute(stmt)
+            await session.commit()
+
+            # For SQLite, use lastrowid to get the inserted ID
+            if session.bind.dialect.name.lower() == 'sqlite':
+                return res.lastrowid
+
+            return res.scalar_one()
+
+    async def update(self, data: dict, **kwargs):
+        async with async_session_maker() as session:
+            stmt = update(self.model).filter_by(**kwargs).values(**data)
+            await session.execute(stmt)
+            await session.commit()
+    
+    async def find_by_options(self, unique: bool = False, **kwargs):
+        async with async_session_maker() as session:
+            stmt = select(self.model).filter_by(**kwargs)
+            results = await session.execute(stmt)
+            if unique:
+                results = results.scalar_one_or_none()
+            else:
+                results = results.scalars().all()
+            return results
