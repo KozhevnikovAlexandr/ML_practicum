@@ -56,7 +56,9 @@ sudo python3 main.py в папке app
 Swagger -- http://localhost:81/docs#/
 
 POST /resiter - регистрирует юзера в базе 
+
 POST /login - возвращает токен по емейлу и паролю 
+
 POST /predict - в заголовке токен, в теле запроса данные для модели 
 
 ## БД 
