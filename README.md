@@ -12,6 +12,30 @@ sudo python3 main.py в папке app
 
 Заходить на localhost:81
 
+## Пример данных 
+
+{
+  "ModelName": "boosting",
+  "N_Days": 400,
+  "Drug": "D-penicillamine",
+  "Age": 21464,
+  "Sex": "F",
+  "Ascites": "Y",
+  "Hepatomegaly": "Y",
+  "Spiders": "Y",
+  "Edema": "Y",
+  "Bilirubin": 14.5,
+  "Cholesterol": 261.0,
+  "Albumin": 2.6,
+  "Copper": 156.0,
+  "Alk_Phos": 1718.0,
+  "SGOT": 137.95,
+  "Tryglicerides": 172.0,
+  "Platelets": 190.0,
+  "Prothrombin": 12.2,
+  "Stage": 4.0
+}
+
 ## Приложение 
 
 ![изображение](https://github.com/KozhevnikovAlexandr/ML_practicum/assets/56560126/a4ea8b51-b307-4e20-886e-f1fcf0ecd679)
@@ -28,3 +52,5 @@ POST /login - возвращает токен по емейлу и паролю
 POST /predict - в заголовке токен, в теле запроса данные для модели 
 
 ## БД 
+
+![изображение](https://github.com/KozhevnikovAlexandr/ML_practicum/assets/56560126/e01a2189-7f8d-4916-ba82-4a2b070d37b7)
