@@ -62,23 +62,79 @@
 <body>
     <div class="container">
         <h2>Login</h2>
-        <form action="/login" method="post">
+        <form id="loginForm">
             <label>Email:</label>
-            <input type="text" name="email">
+            <input type="text" id="loginEmail" name="email">
             <label>Password:</label>
-            <input type="password" name="password">
-            <input type="submit" value="Login">
+            <input type="password" id="loginPassword" name="password">
+            <input type="button" onclick="login()" value="Login">
         </form>
         <h2>Register</h2>
-        <form action="/register" method="post">
+        <form id="registerForm">
             <label>Name:</label>
-            <input type="text" name="name">
+            <input type="text" id="registerName" name="name">
             <label>Email:</label>
-            <input type="text" name="email">
+            <input type="text" id="registerEmail" name="email">
             <label>Password:</label>
-            <input type="password" name="password">
-            <input type="submit" value="Register">
+            <input type="password" id="registerPassword" name="password">
+            <input type="button" onclick="register()" value="Register">
         </form>
     </div>
+
+    <script>
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert(response)
+                    localStorage.setItem('accessToken', response.access_token);
+                    window.location.href = "/login";
+                } else {
+                    console.error('Ошибка при регистрации');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });   
+        }
+
+        function register() {
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, email, password })
+            })
+            .then(response => {
+                if (response.ok) {                
+                var data = response.text()
+                .then(result_data => {
+                    var data_json = JSON.parse(result_data); 
+                    localStorage.setItem('accessToken', data_json.token);
+                })
+                }
+                 else {
+                    console.error('Ошибка при регистрации');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });   
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Data Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Patient Data Form</h2>
+        <form id="patientForm">
+            <div class="mb-3">
+                <label for="ModelName" class="form-label">Model Name:</label>
+                <input type="text" class="form-control" id="ModelName" name="ModelName" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="N_Days" class="form-label">N Days:</label>
+                <input type="number" class="form-control" id="N_Days" name="N_Days" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Drug" class="form-label">Drug:</label>
+                <input type="text" class="form-control" id="Drug" name="Drug" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Age" class="form-label">Age:</label>
+                <input type="number" class="form-control" id="Age" name="Age" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Sex" class="form-label">Sex:</label>
+                <select class="form-select" id="Sex" name="Sex" required>
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="Ascites" class="form-label">Ascites:</label>
+                <input type="text" class="form-control" id="Ascites" name="Ascites" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Hepatomegaly" class="form-label">Hepatomegaly:</label>
+                <input type="text" class="form-control" id="Hepatomegaly" name="Hepatomegaly" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Spiders" class="form-label">Spiders:</label>
+                <input type="text" class="form-control" id="Spiders" name="Spiders" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Edema" class="form-label">Edema:</label>
+                <input type="text" class="form-control" id="Edema" name="Edema" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Bilirubin" class="form-label">Bilirubin:</label>
+                <input type="number" step="0.01" class="form-control" id="Bilirubin" name="Bilirubin" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Cholesterol" class="form-label">Cholesterol:</label>
+                <input type="number" step="0.01" class="form-control" id="Cholesterol" name="Cholesterol" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Albumin" class="form-label">Albumin:</label>
+                <input type="number" step="0.01" class="form-control" id="Albumin" name="Albumin" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Copper" class="form-label">Copper:</label>
+                <input type="number" step="0.01" class="form-control" id="Copper" name="Copper" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Alk_Phos" class="form-label">Alk Phos:</label>
+                <input type="number" step="0.01" class="form-control" id="Alk_Phos" name="Alk_Phos" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="SGOT" class="form-label">SGOT:</label>
+                <input type="number" step="0.01" class="form-control" id="SGOT" name="SGOT" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Tryglicerides" class="form-label">Tryglicerides:</label>
+                <input type="number" step="0.01" class="form-control" id="Tryglicerides" name="Tryglicerides" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Platelets" class="form-label">Platelets:</label>
+                <input type="number" step="0.01" class="form-control" id="Platelets" name="Platelets" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Prothrombin" class="form-label">Prothrombin:</label>
+                <input type="number" step="0.01" class="form-control" id="Prothrombin" name="Prothrombin" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="Stage" class="form-label">Stage:</label>
+                <input type="number" class="form-control" id="Stage" name="Stage" required>
+            </div>
+        
+            <button type="button" class="btn btn-primary" onclick="predict()">Predict</button>
+        </form>
+
+        <div class="mt-4" id="predictionResult"></div>
+    </div>
+
+    <script>
+        function predict() {
+            const formData = new FormData(document.getElementById('patientForm'));
+            const jsonData = {};
+
+            for (const [key, value] of formData.entries()) {
+                jsonData[key] = value;
+            }
+            console.log()
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
+                },
+                body: JSON.stringify(jsonData),
+            })
+            //.then(response => response.json())
+            .then(response => {
+                document.getElementById('predictionResult').innerText = JSON.stringify(response);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

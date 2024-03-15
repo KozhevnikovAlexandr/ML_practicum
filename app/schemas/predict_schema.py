@@ -4,6 +4,8 @@ from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 
+from database.models import Prediction
+
 sys.path.append(str(Path(__file__).resolve().parents[3]))
 
 class PatientData(BaseModel):
@@ -26,3 +28,22 @@ class PatientData(BaseModel):
     Platelets: float
     Prothrombin: float
     Stage: int
+
+
+class PredictionResponce(BaseModel):
+    prediction_id: int
+    transaction_id: int
+    result: str
+    some_data: str  
+    model_id: int
+
+    @classmethod
+    def get_from_db(cls, db_prediction: Prediction):
+        responce = PredictionResponce(
+            prediction_id=db_prediction.id,
+            transaction_id=db_prediction.transaction_id,
+            result=db_prediction.result,
+            some_data=db_prediction.some_data,
+            model_id=db_prediction.model_id
+        )
+        return responce

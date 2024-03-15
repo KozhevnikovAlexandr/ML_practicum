@@ -3,13 +3,15 @@ from pathlib import Path
 
 from hashlib import md5
 
+from utils.exeptions import NotFoundError
+
 
 sys.path.append(str(Path(__file__).resolve().parents[2]))
-from api.v1.schemas.auth_schema import UserLogin, UserRegister, UserLoginResponse, User
-from infrastructure.repository.base_repository import AbstractRepository
-from infrastructure.core.security import create_jwt_token
-from infrastructure.database.model import Users
-from infrastructure.repository.user_repository import UserRepository
+from schemas.auth_schema import UserLoginSchema, UserRegisterSchema, UserLoginResponseSchema, UserSchema
+from database.models import User
+from repository.base_repository import AbstractRepository
+from utils.security import create_jwt_token
+from repository.user_repository import UserRepository
 
 
 
@@ -17,44 +19,45 @@ class AuthService:
     def __init__(self, users_repo: AbstractRepository):
         self.users_repo: AbstractRepository = users_repo()
 
-    async def login(self, user: UserLogin):
+    async def login(self, user: UserLoginSchema):
 
-        db_user: Users = await self.users_repo.find_by_options(name=user.name, unique=True)
-
+        db_user: User = await self.users_repo.find_by_options(email=user.email, unique=True)
+        print(db_user.password, user.password)
         if db_user is None:
             raise Exception("User not found")
-        if db_user.password != md5(user.password.encode('utf-8')).hexdigest():
+        if db_user.password !=  user.password: # md5(user.password.encode('utf-8')).hexdigest():
             raise Exception("Password is incorrect")
 
-        user: User = User(id=db_user.id, name=db_user.name, email=db_user.email)
+        user: UserSchema = UserSchema(id=db_user.id, name=db_user.name, email=db_user.email)
 
         access_token = create_jwt_token(user)
 
-        return UserLoginResponse(access_token=access_token,
+
+        return UserLoginResponseSchema(access_token=access_token,
                                  user_info=user)
 
-    async def register(self, user: UserRegister):
+    async def register(self, user: UserSchema):
 
-        db_user = await self.users_repo.find_by_options(name=user.email, unique=True)
+        db_user = await self.users_repo.find_by_options(email=user.email, unique=True)
 
         if db_user is not None:
-            raise Exception("User already exists")
-
+            raise Exception("Email already exists")
+        
         user_id = await self.users_repo.add(data={"name": user.name, 
-                                                  "password": md5(user.password.encode('utf-8')).hexdigest(),
+                                                  "password": user.password, # md5(user.password.encode('utf-8')).hexdigest(),
                                                   "email": user.email,
                                                   "balance": 100})
 
-        user: User = User(id=user_id, name=user.name, email=user.email)
+        user: UserSchema = UserSchema(id=user_id, name=user.name, email=user.email)
 
         access_token = create_jwt_token(user)
 
-        return UserLoginResponse(access_token=access_token,
+        return UserLoginResponseSchema(access_token=access_token,
                                  user_info=user)
 
-    async def get_balance(self, user: User):
+    async def get_balance(self, user: UserSchema):
 
-        db_user = await self.users_repo.find_by_options(name=user.name, unique=True)
+        db_user = await self.users_repo.find_by_options(email=user.email, unique=True)
         if db_user is None:
             raise Exception("User not found")
         return {'balance': db_user.balance}

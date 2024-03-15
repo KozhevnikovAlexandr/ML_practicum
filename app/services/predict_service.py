@@ -16,7 +16,7 @@ from repository.user_repository import UserRepository
 from repository.billing_repository import BilingRepository
 
 
-from services.task import predict, q
+from services.task import predict
 
 
 
@@ -30,8 +30,8 @@ class PredictionService:
         self.billing_repo: AbstractRepository = billing_repo()
 
     @job("default", timeout=-1)
-    def enqueue_predict_task(self, data, *args, **kwargs):
-        return predict(data, *args, **kwargs)
+    async def enqueue_predict_task(self, data, prediction_id,  model_name, *args, **kwargs):
+        return await predict(data,  prediction_id,  model_name, *args, **kwargs)
 
     async def register_prediction(self, user_id: int, model: str, file, **kwargs):
         db_model = await self.models_repo.find_by_options(name=model, unique=True)
@@ -40,10 +40,10 @@ class PredictionService:
         if db_model is None:
             raise NotFoundError(detail="Model not found")
 
-        #if db_user.balance < db_model.price:
-        #    raise DuplicatedError(detail="Not enough money")
+        if db_user.balance < db_model.price:
+            raise DuplicatedError(detail="Not enough money")
 
-        #await self.user_repo.update({"balance": db_user.balance - db_model.price}, id=user_id)
+        await self.user_repo.update({"balance": db_user.balance - db_model.price}, id=user_id)
         
         billing_data = {}
         billing_data['user_id'] = db_user.id
@@ -62,8 +62,8 @@ class PredictionService:
 
         data = {}
         for column in columns_to_predict:
-            if column in vars(file):
-                data[column] = vars(file)[column]
+            if hasattr(file, column):
+                data[column] = getattr(file, column)
             else:
                 raise NotFoundError(detail=f"Not enough data {column, file}")
 
@@ -72,13 +72,9 @@ class PredictionService:
 
         return prediction_id
 
-    async def get_predictions(self, user_id: int, prediction_id: int = None):
-        if prediction_id is None:
-            predictions = await self.prediction_repo.find_by_options(user_id=user_id)
-        else:
-            predictions = await self.prediction_repo.find_by_options(id=prediction_id,
-                                                                     user_id=user_id,
-                                                                     unique=True)
+    async def get_predictions(self, prediction_id: int = None):
+        predictions = await self.prediction_repo.find_by_options(id=prediction_id,
+                                                                unique=True)
         return predictions
 
 

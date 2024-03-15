@@ -23,12 +23,14 @@ class PredictModel(MLModel):
 class TreeModel(PredictModel):
 
     def __init__(self):
+        super().__init__()
         self.model = self.load('/home/akozhevnikov/dz/systemdisine/app/ml/models/tree.pkl')
 
 
 class KNNModel(PredictModel):
 
     def __init__(self):
+        super().__init__()
         self.model = self.load('/home/akozhevnikov/dz/systemdisine/app/ml/models/knn.pkl')
 
 
